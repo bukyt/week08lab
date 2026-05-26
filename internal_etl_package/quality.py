@@ -16,6 +16,9 @@ import logging
 from dataclasses import dataclass
 from typing import Literal
 
+#from inflect import engine
+#from matplotlib.table import table
+
 from internal_etl_package import DataQualityError
 from internal_etl_package.alerting import send_slack_alert
 from internal_etl_package.config_loader import TableConfig
@@ -104,20 +107,20 @@ def post_audit(table_config: TableConfig, engine: TableEngine) -> None:
 
     # ─── Phase 3, Step 1 of 3 ─────────────────────────────────────────────
     # Count primary-key values that appear more than once.
-    # The engine already exposes a method for this — find it in engines/base.py.
-    # 👉 TODO: replace 0 with a call to the engine.
-    duplicate_count = 0  # TODO
-
+    duplicate_count = engine.count_duplicates(table, pk)
     log.info(f"[{table}] Post-audit: {duplicate_count} duplicate keys found.")
 
     if duplicate_count > 0:
         # ─── Phase 3, Step 2 of 3 ─────────────────────────────────────────
-        # Page the team. Use `send_slack_alert` (already imported above) with
-        # severity="CRITICAL" so it routes to #data-incidents AND the pager.
-        # 👉 TODO: call send_slack_alert(...) before raising below.
-        pass  # TODO
+        # Page the team. Use `send_slack_alert` with severity="CRITICAL".
+        send_slack_alert(
+            table=table,
+            severity="CRITICAL",
+            message=f"{table}: {duplicate_count} duplicate keys detected",
+        )
 
         # ─── Phase 3, Step 3 of 3 ─────────────────────────────────────────
         # Stop the pipeline so downstream consumers never see the bad data.
-        # 👉 TODO: raise DataQualityError with a helpful message.
-        pass  # TODO
+        raise DataQualityError(
+            f"[{table}] Post-audit failed: {duplicate_count} duplicate keys found."
+        )
