@@ -1,24 +1,24 @@
-# Maria's table replication config.
-# Add a new table = add a new entry here. The factory does the rest.
 tables:
   - name: prd.users
-    engine: trino              # which TableEngine to use; defaults to spark
+    engine: trino
     primary_key: user_id
     source_path: /opt/data/source/users/
     critical_columns: [user_id, email, created_at]
     freshness_sla_hours: 6
     severity: critical
+
   - name: prd.orders
-    engine: spark
+    engine: trino
     primary_key: order_id
-    source_path: /opt/data/seed/orders.csv
+    source_path: /opt/data/source/orders/
     critical_columns: [order_id, user_id, amount, created_at]
     freshness_sla_hours: 6
-    severity: warning   # <-- FIX
+    severity: warning
+
   - name: prd.events
-    engine: spark
+    engine: trino
     primary_key: event_id
-    source_path: /opt/data/seed/events.csv
+    source_path: /opt/data/source/events/
     critical_columns: [event_id, user_id, event_type, occurred_at]
     freshness_sla_hours: 6
-    severity: warning   # <-- FIX
+    severity: warning

@@ -16,3 +16,4 @@ data/source/*/
 
 warehouse/
 .pytest_cache/
+.venv
